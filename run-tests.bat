@@ -24,3 +24,4 @@ echo Running tests
 npx playwright test --reporter=list
 
 echo ===== END =====
+Test CI trigger
