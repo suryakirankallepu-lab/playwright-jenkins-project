@@ -4,9 +4,17 @@ import { Page } from '@playwright/test';
 export class LoginPage {
   constructor(private page: Page) {}
 
-  async goto() {
-    await this.page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
-  }
+ 
+async goto() {
+  await this.page.goto(
+    'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login',
+    { waitUntil: 'domcontentloaded', timeout: 60000 }
+  );
+}
+
+  
+
+
 
   async login(username: string, password: string) {
     await this.page.getByPlaceholder('Username').fill(username);
