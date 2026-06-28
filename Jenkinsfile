@@ -21,18 +21,21 @@ pipeline {
             }
         }
 
-        stage('Run Tests in Docker') {
-            steps {
-                sh '''
-                echo "Running Playwright inside Docker..."
+       
+stage('Run Tests in Docker') {
+    steps {
+        sh '''
+        echo "Workspace path: $WORKSPACE"
+        ls -la $WORKSPACE
 
-                docker run --rm \
-                  -v $(pwd):/app \
-                  -w /app \
-                  mcr.microsoft.com/playwright:v1.45.0-focal \
-                  bash -c "ls -la && npm install && npx playwright test"
-                '''
-            }
-        }
+        docker run --rm \
+          -v "$WORKSPACE:/app" \
+          -w /app \
+          mcr.microsoft.com/playwright:v1.45.0-focal \
+          bash -c "ls -la && npm install && npx playwright test"
+        '''
+    }
+}
+
     }
 }
