@@ -1,9 +1,10 @@
-
 pipeline {
-    agent any
 
-    environment {
-        NODE_ENV = 'test'
+    agent {
+        docker {
+            image 'mcr.microsoft.com/playwright:v1.45.0-focal'
+            args '--ipc=host'
+        }
     }
 
     stages {
@@ -18,69 +19,18 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                script {
-                    if (isUnix()) {
-                        sh '''
-                            echo "Running on Linux/Docker"
-                            node -v
-                            npm -v
-                            npm install
-                            npx playwright install
-                        '''
-                    } else {
-                        bat '''
-                            echo Running on Windows
-                            node -v
-                            npm -v
-                            npm install
-                            npx playwright install
-                        '''
-                    }
-                }
+                sh '''
+                    echo "Running in Playwright Docker"
+                    node -v
+                    npm -v
+                    npm install
+                '''
             }
         }
 
-        stage('Run Tests in Parallel') {
-            parallel {
-
-                stage('Chromium Tests') {
-                    steps {
-                        script {
-                            if (isUnix()) {
-                                sh 'npx playwright test --project=chromium'
-                            } else {
-                                bat 'npx playwright test --project=chromium'
-                            }
-                        }
-                    }
-                }
-
-                stage('Firefox Tests') {
-                    steps {
-                        script {
-                            if (isUnix()) {
-                                sh 'npx playwright test --project=firefox'
-                            } else {
-                                bat 'npx playwright test --project=firefox'
-                            }
-                        }
-                    }
-                }
-
-                /*
-                Optional:
-                stage('WebKit Tests') {
-                    steps {
-                        script {
-                            if (isUnix()) {
-                                sh 'npx playwright test --project=webkit'
-                            } else {
-                                bat 'npx playwright test --project=webkit'
-                            }
-                        }
-                    }
-                }
-                */
+        stage('Run Tests') {
+            steps {
+                sh 'npx playwright test'
             }
         }
 
@@ -97,15 +47,11 @@ pipeline {
         }
 
         success {
-            echo '✅ Tests Passed Successfully'
+            echo '✅ Tests Passed'
         }
 
         failure {
             echo '❌ Tests Failed'
-        }
-
-        cleanup {
-            cleanWs()
         }
     }
 }
