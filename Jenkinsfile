@@ -1,15 +1,9 @@
 pipeline {
-
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright:v1.45.0-focal'
-            args '--ipc=host'
-        }
-    }
+    agent any
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/suryakirankallepu-lab/playwright-jenkins-project.git',
@@ -19,18 +13,45 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                    echo "Running in Playwright Docker"
-                    node -v
-                    npm -v
-                    npm install
-                '''
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            echo "Running on Docker/Linux"
+                            
+                            # install node only if missing
+                            if ! command -v node > /dev/null; then
+                                echo "Installing Node..."
+                                apt-get update
+                                apt-get install -y nodejs npm
+                            fi
+
+                            node -v
+                            npm -v
+                            npm install
+                            npx playwright install
+                        '''
+                    } else {
+                        bat '''
+                            echo Running on Windows
+                            node -v
+                            npm -v
+                            npm install
+                            npx playwright install
+                        '''
+                    }
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'npx playwright test'
+                script {
+                    if (isUnix()) {
+                        sh 'npx playwright test'
+                    } else {
+                        bat 'npx playwright test'
+                    }
+                }
             }
         }
 
@@ -45,11 +66,9 @@ pipeline {
         always {
             echo 'Pipeline completed'
         }
-
         success {
             echo '✅ Tests Passed'
         }
-
         failure {
             echo '❌ Tests Failed'
         }
