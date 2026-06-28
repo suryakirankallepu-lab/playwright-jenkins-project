@@ -27,17 +27,17 @@ stage('Run Tests') {
             if (isUnix()) {
 
                 sh '''
-                echo "Running inside Docker Jenkins"
+echo "Running inside Docker Jenkins"
 
-                docker run --rm \
-                mcr.microsoft.com/playwright:v1.61.1-focal \
-                bash -c "
-                  git clone https://github.com/suryakirankallepu-lab/playwright-jenkins-project.git app &&
-                  cd app &&
-                  npm install &&
-                  npx playwright test
-                "
-                '''
+docker run --rm \
+mcr.microsoft.com/playwright:v1.61.0-focal \
+bash -c "
+  git clone https://github.com/suryakirankallepu-lab/playwright-jenkins-project.git app &&
+  cd app &&
+  npm install &&
+  npx playwright test
+"
+'''
 
             } else {
 
