@@ -1,11 +1,12 @@
 
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright:v1.44.0-jammy'
-            args '--user root'
-        }
+    
+agent {
+    docker {
+        image 'node:18'
     }
+}
+
 
     stages {
 
