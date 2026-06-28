@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)   // ✅ VERY IMPORTANT
+    }
+
     stages {
 
         stage('Clean Workspace') {
@@ -9,7 +13,7 @@ pipeline {
             }
         }
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/suryakirankallepu-lab/playwright-jenkins-project.git',
