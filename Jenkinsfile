@@ -2,10 +2,6 @@
 pipeline {
     agent any
 
-    options {
-        timestamps()
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -16,32 +12,30 @@ pipeline {
             }
         }
 
-       
+        stage('Install Dependencies') {
+            steps {
+                bat """
+                echo Installing dependencies...
 
-stage('Install Dependencies') {
-    steps {
-        bat '''
-        echo Installing dependencies...
+                node -v
+                npm -v
 
-        node -v
-        npm -v
-
-        npm install
-        npx playwright install
-        '''
-    }
-}
-
+                npm install
+                npx playwright install
+                """
+            }
+        }
 
         stage('Run Playwright Tests') {
             steps {
-                bat '''
-                echo Running tests
+                bat """
+                echo Running tests...
+
                 rmdir /s /q test-results 2>nul
                 rmdir /s /q playwright-report 2>nul
 
                 npx playwright test --project=chromium --reporter=html
-                '''
+                """
             }
         }
 
@@ -56,13 +50,11 @@ stage('Install Dependencies') {
         always {
             echo 'Pipeline completed'
         }
-
-        success {
-            echo 'All tests passed'
-        }
-
         failure {
             echo 'Tests failed'
+        }
+        success {
+            echo 'Tests passed'
         }
     }
 }
