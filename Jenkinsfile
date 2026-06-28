@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     options {
-        skipDefaultCheckout(true)   // ✅ VERY IMPORTANT
+        skipDefaultCheckout(true)
     }
 
     stages {
@@ -21,21 +21,46 @@ pipeline {
             }
         }
 
-       
-stage('Run Tests in Docker') {
-    steps {
-        sh '''
-        echo "Workspace path: $WORKSPACE"
-        ls -la $WORKSPACE
+        stage('Run Tests') {
+            steps {
+                script {
 
-        docker run --rm \
-          -v "$WORKSPACE:/app" \
-          -w /app \
-          mcr.microsoft.com/playwright:v1.45.0-focal \
-          bash -c "ls -la && npm install && npx playwright test"
-        '''
-    }
-}
+                    if (isUnix()) {
+                        // ✅ Docker Jenkins (Linux)
+                        sh '''
+                        echo "Running inside Docker Jenkins"
 
+                        docker run --rm \
+                        mcr.microsoft.com/playwright:v1.45.0-focal \
+                        bash -c "
+                          git clone https://github.com/suryakirankallepu-lab/playwright-jenkins-project.git app &&
+                          cd app &&
+                          ls -la &&
+                          npm install &&
+                          npx playwright test
+                        "
+                        '''
+                    } else {
+                        // ✅ Windows Jenkins
+                        bat '''
+                        echo Running on Windows Jenkins
+
+                        npm install
+                        npx playwright install
+                        npx playwright test
+                        '''
+                    }
+
+                }
+            }
+        }
+
+        stage('Archive Reports') {
+            steps {
+                archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+            }
+        }
     }
-}
+
+    post {
+        always {
