@@ -3,6 +3,12 @@ pipeline {
 
     stages {
 
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -11,55 +17,18 @@ pipeline {
             }
         }
 
-        
-stage('Run Tests in Docker (Linux/Docker only)') {
-    when {
-        expression { isUnix() }
-    }
-    steps {
-        sh '''
-        echo "Running Playwright inside Docker..."
-
-        docker run --rm \
-          -v $(pwd):/app \
-          -w /app \
-          mcr.microsoft.com/playwright:v1.45.0-focal \
-          bash -c "ls -la && npm install && npx playwright test"
-        '''
-    }
-}
-
-
-        stage('Run Tests on Windows') {
-            when {
-                not { expression { isUnix() } }
-            }
+        stage('Run Tests in Docker') {
             steps {
-                bat '''
-                    echo Running on Windows machine
-                    npm install
-                    npx playwright install
-                    npx playwright test
+                sh '''
+                echo "Running Playwright inside Docker..."
+
+                docker run --rm \
+                  -v $(pwd):/app \
+                  -w /app \
+                  mcr.microsoft.com/playwright:v1.45.0-focal \
+                  bash -c "ls -la && npm install && npx playwright test"
                 '''
             }
-        }
-
-        stage('Archive Reports') {
-            steps {
-                archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
-            }
-        }
-    }
-
-    post {
-        always {
-            echo 'Pipeline completed'
-        }
-        success {
-            echo 'Tests Passed'
-        }
-        failure {
-            echo 'Tests Failed'
         }
     }
 }
