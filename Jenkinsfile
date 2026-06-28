@@ -1,7 +1,6 @@
 
 pipeline {
-    
-
+    agent any   // ✅ THIS WAS MISSING
 
     stages {
 
@@ -15,9 +14,11 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'node -v'
-                sh 'npm -v'
-                sh 'npm install'
+                // ✅ Windows Jenkins → use bat instead of sh
+                bat 'node -v'
+                bat 'npm -v'
+                bat 'npm install'
+                bat 'npx playwright install'
             }
         }
 
@@ -26,13 +27,13 @@ pipeline {
 
                 stage('Chromium') {
                     steps {
-                        sh 'npx playwright test --project=chromium'
+                        bat 'npx playwright test --project=chromium'
                     }
                 }
 
                 stage('Firefox') {
                     steps {
-                        sh 'npx playwright test --project=firefox'
+                        bat 'npx playwright test --project=firefox'
                     }
                 }
             }
@@ -45,3 +46,4 @@ pipeline {
         }
     }
 }
+``
