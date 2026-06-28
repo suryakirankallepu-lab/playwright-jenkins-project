@@ -24,12 +24,14 @@ stage('Install Dependencies') {
 }
 
 
-        
+
 stage('Run Playwright Tests') {
     steps {
         bat 'echo Running tests...'
-        bat 'rmdir /s /q test-results 2>nul'
-        bat 'rmdir /s /q playwright-report 2>nul'
+
+        bat 'if exist test-results rmdir /s /q test-results'
+        bat 'if exist playwright-report rmdir /s /q playwright-report'
+
         bat 'npx playwright test --project=chromium --reporter=html'
     }
 }
