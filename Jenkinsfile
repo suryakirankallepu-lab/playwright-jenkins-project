@@ -16,17 +16,22 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                bat '''
-                echo Installing Node and dependencies
-                node -v
-                npm -v
-                npm install
-                npx playwright install
-                '''
-            }
-        }
+       
+
+stage('Install Dependencies') {
+    steps {
+        bat '''
+        echo Installing dependencies...
+
+        node -v
+        npm -v
+
+        npm install
+        npx playwright install
+        '''
+    }
+}
+
 
         stage('Run Playwright Tests') {
             steps {
