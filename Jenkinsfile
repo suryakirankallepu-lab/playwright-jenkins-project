@@ -26,7 +26,7 @@ pipeline {
                 script {
 
                     if (isUnix()) {
-                        // ✅ Docker Jenkins (Linux)
+
                         sh '''
                         echo "Running inside Docker Jenkins"
 
@@ -40,8 +40,9 @@ pipeline {
                           npx playwright test
                         "
                         '''
+
                     } else {
-                        // ✅ Windows Jenkins
+
                         bat '''
                         echo Running on Windows Jenkins
 
@@ -50,17 +51,20 @@ pipeline {
                         npx playwright test
                         '''
                     }
-
                 }
-            }
-        }
-
-        stage('Archive Reports') {
-            steps {
-                archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
             }
         }
     }
 
     post {
         always {
+            echo 'Pipeline completed'
+        }
+        success {
+            echo '✅ SUCCESS'
+        }
+        failure {
+            echo '❌ FAILED'
+        }
+    }
+}
