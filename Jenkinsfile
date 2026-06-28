@@ -1,6 +1,10 @@
 
 pipeline {
-    agent any   // ✅ THIS WAS MISSING
+    agent any
+
+    environment {
+        NODE_ENV = 'test'
+    }
 
     stages {
 
@@ -14,28 +18,69 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // ✅ Windows Jenkins → use bat instead of sh
-                bat 'node -v'
-                bat 'npm -v'
-                bat 'npm install'
-                bat 'npx playwright install'
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            echo "Running on Linux/Docker"
+                            node -v
+                            npm -v
+                            npm install
+                            npx playwright install
+                        '''
+                    } else {
+                        bat '''
+                            echo Running on Windows
+                            node -v
+                            npm -v
+                            npm install
+                            npx playwright install
+                        '''
+                    }
+                }
             }
         }
 
-        stage('Run Playwright Tests') {
+        stage('Run Tests in Parallel') {
             parallel {
 
-                stage('Chromium') {
+                stage('Chromium Tests') {
                     steps {
-                        bat 'npx playwright test --project=chromium'
+                        script {
+                            if (isUnix()) {
+                                sh 'npx playwright test --project=chromium'
+                            } else {
+                                bat 'npx playwright test --project=chromium'
+                            }
+                        }
                     }
                 }
 
-                stage('Firefox') {
+                stage('Firefox Tests') {
                     steps {
-                        bat 'npx playwright test --project=firefox'
+                        script {
+                            if (isUnix()) {
+                                sh 'npx playwright test --project=firefox'
+                            } else {
+                                bat 'npx playwright test --project=firefox'
+                            }
+                        }
                     }
                 }
+
+                /*
+                Optional:
+                stage('WebKit Tests') {
+                    steps {
+                        script {
+                            if (isUnix()) {
+                                sh 'npx playwright test --project=webkit'
+                            } else {
+                                bat 'npx playwright test --project=webkit'
+                            }
+                        }
+                    }
+                }
+                */
             }
         }
 
@@ -43,6 +88,24 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed'
+        }
+
+        success {
+            echo '✅ Tests Passed Successfully'
+        }
+
+        failure {
+            echo '❌ Tests Failed'
+        }
+
+        cleanup {
+            cleanWs()
         }
     }
 }
