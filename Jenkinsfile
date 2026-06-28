@@ -20,40 +20,39 @@ pipeline {
                     credentialsId: 'github-creds'
             }
         }
+stage('Run Tests') {
+    steps {
+        script {
 
-        stage('Run Tests') {
-            steps {
-                script {
+            if (isUnix()) {
 
-                    if (isUnix()) {
+                sh '''
+                echo "Running inside Docker Jenkins"
 
-                        sh '''
-                        echo "Running inside Docker Jenkins"
+                docker run --rm \
+                mcr.microsoft.com/playwright:v1.61.1-focal \
+                bash -c "
+                  git clone https://github.com/suryakirankallepu-lab/playwright-jenkins-project.git app &&
+                  cd app &&
+                  npm install &&
+                  npx playwright test
+                "
+                '''
 
-                        docker run --rm \
-                        mcr.microsoft.com/playwright:v1.45.0-focal \
-                        bash -c "
-                          git clone https://github.com/suryakirankallepu-lab/playwright-jenkins-project.git app &&
-                          cd app &&
-                          ls -la &&
-                          npm install &&
-                          npx playwright test
-                        "
-                        '''
+            } else {
 
-                    } else {
+                bat '''
+                echo Running on Windows Jenkins
 
-                        bat '''
-                        echo Running on Windows Jenkins
-
-                        npm install
-                        npx playwright install
-                        npx playwright test
-                        '''
-                    }
-                }
+                npm install
+                npx playwright install
+                npx playwright test
+                '''
             }
         }
+    }
+}
+
     }
 
     post {
