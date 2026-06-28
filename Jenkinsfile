@@ -11,22 +11,24 @@ pipeline {
             }
         }
 
-        stage('Run Tests in Docker (Linux/Docker only)') {
-            when {
-                expression { isUnix() }
-            }
-            steps {
-                sh '''
-                    echo "Running Playwright inside Docker..."
+        
+stage('Run Tests in Docker (Linux/Docker only)') {
+    when {
+        expression { isUnix() }
+    }
+    steps {
+        sh '''
+        echo "Running Playwright inside Docker..."
 
-                    docker run --rm \
-                      -v $PWD:/app \
-                      -w /app \
-                      mcr.microsoft.com/playwright:v1.45.0-focal \
-                      bash -c "npm install && npx playwright test"
-                '''
-            }
-        }
+        docker run --rm \
+          -v $(pwd):/app \
+          -w /app \
+          mcr.microsoft.com/playwright:v1.45.0-focal \
+          bash -c "ls -la && npm install && npx playwright test"
+        '''
+    }
+}
+
 
         stage('Run Tests on Windows') {
             when {
@@ -54,10 +56,10 @@ pipeline {
             echo 'Pipeline completed'
         }
         success {
-            echo '✅ Tests Passed'
+            echo 'Tests Passed'
         }
         failure {
-            echo '❌ Tests Failed'
+            echo 'Tests Failed'
         }
     }
 }
