@@ -12,32 +12,28 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                bat """
-                echo Installing dependencies...
+        
+stage('Install Dependencies') {
+    steps {
+        bat 'echo Installing dependencies...'
+        bat 'node -v'
+        bat 'npm -v'
+        bat 'npm install'
+        bat 'npx playwright install'
+    }
+}
 
-                node -v
-                npm -v
 
-                npm install
-                npx playwright install
-                """
-            }
-        }
+        
+stage('Run Playwright Tests') {
+    steps {
+        bat 'echo Running tests...'
+        bat 'rmdir /s /q test-results 2>nul'
+        bat 'rmdir /s /q playwright-report 2>nul'
+        bat 'npx playwright test --project=chromium --reporter=html'
+    }
+}
 
-        stage('Run Playwright Tests') {
-            steps {
-                bat """
-                echo Running tests...
-
-                rmdir /s /q test-results 2>nul
-                rmdir /s /q playwright-report 2>nul
-
-                npx playwright test --project=chromium --reporter=html
-                """
-            }
-        }
 
         stage('Archive Reports') {
             steps {
