@@ -21,6 +21,9 @@ export default defineConfig({
 
   
 
+  
+testDir: './tests',
+
   projects: [
     {
       name: 'chromium',
@@ -35,6 +38,7 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
   ],
+
 });
 
 });
