@@ -26,13 +26,21 @@ stage('Install Dependencies') {
 
 
 stage('Run Playwright Tests') {
-    steps {
-        bat 'echo Running tests...'
+    parallel {
 
-        bat 'if exist test-results rmdir /s /q test-results'
-        bat 'if exist playwright-report rmdir /s /q playwright-report'
+        stage('Chromium Tests') {
+            steps {
+                bat 'echo Running Chromium tests...'
+                bat 'npx playwright test --project=chromium --reporter=html'
+            }
+        }
 
-        bat 'npx playwright test --project=chromium --reporter=html'
+        stage('Firefox Tests') {
+            steps {
+                bat 'echo Running Firefox tests...'
+                bat 'npx playwright test --project=firefox --reporter=html'
+            }
+        }
     }
 }
 
